@@ -63,3 +63,9 @@ This also needs to be do-able by integer reference, i.e. `list(1,"a","b")` would
 
 Ideally, this would work even if those object / keys / entries turned out to not be present!!
 
+
+
+# Open Questions
+
+- How should we handle the existing list?  Should we hold to "copy on reference" or should we modify the list using "do not repeat yourself"... pull the items out?  Probaby pull the items out... some items are not reversible
+- maybe worth creating callbacks for naming the columns...?  This at least for unnamed columns... named columns will be preserved?  What about handling nested behavior, though... maybe a callback for that too

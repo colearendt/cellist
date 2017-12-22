@@ -12,7 +12,7 @@ pull_item <- function(inlist, target, collector) {
 }
 
 process_spec_one <- function(inlist, col_name, collector) {
-  pulled <- lapply(inlist, pull_item, col_name, collector)
+  pulled <- lapply(list(inlist), pull_item, col_name, collector)
   value <- lapply(pulled, function(x){x[["value"]]})
   parsed <- parse(value, collector)
   setNames(list(parsed),col_name)
@@ -25,9 +25,8 @@ process_spec_one_nol <- function(inlist, col_name, collector) {
   setNames(list(parsed),col_name)
 }
 
-process_spec <- function(list, spec) {
-  show_cols_spec(spec)
-  proc <- mapply(FUN=process_spec_one, list=list(list)
+process_spec <- function(inlist, spec) {
+  proc <- mapply(FUN=process_spec_one_nol, inlist=list(inlist)
                  , col_name=as.list(names(spec$cols))
                  , collector=as.list(unname(spec$cols))
                  , SIMPLIFY=FALSE
@@ -35,6 +34,15 @@ process_spec <- function(list, spec) {
 
   dplyr::bind_cols(proc)
 }
+
+spread_list <- function(tbl, inlist, spec) {
+  show_cols_spec(spec)
+  tbl %>% bind_cols(map_dfr(.$list_col, process_spec, spec))
+}
+
+# internal test: process_spec_one(list("a"=1,"b"=2,"c"=3,"d"=4), "a",spec$cols$a)
+
+
 
 test_that("works with simple list of doubles", {
  tree <- tibble::data_frame(key=c(1,2)
@@ -50,15 +58,16 @@ test_that("works with simple list of doubles", {
    )
    )
 
- process_spec(tree$list_col, spec)
+ tree %>% spread_list("list_col",spec)
 
- output <- tibble::data_frame(key=c(1,2)
-                              , a=c(1,5)
-                              , b=c(2,6)
-                              , d=c(4,8)
-                              )
-
- # maybe worth creating callbacks for naming the columns...?
+ output <- tree %>% left_join(
+   tibble::data_frame(key=c(1,2)
+                      , a=c(1,5)
+                      , b=c(2,6)
+                      , d=c(4,8)
+                      )
+   , by =c("key")
+ )
 })
 
 test_that("works with missing keys", {
@@ -77,6 +86,7 @@ test_that("works with missing keys", {
   )
 
   process_spec(tree$list_col, spec)
+  spread_list(tree, "list_col", spec)
 
   output <- tibble::data_frame(key=c(1,2)
                                , a=c(1,5)
