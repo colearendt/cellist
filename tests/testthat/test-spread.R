@@ -1,21 +1,57 @@
 context("test-spread.R")
 
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
-})
-
 test_that("works with simple list of doubles", {
  tree <- tibble::data_frame(key=c(1,2)
                             ,list_col=list(
-                              list(1,2,3,4)
-                              ,list(5,6,7,8)
+                              list("a"=1,"b"=2,"c"=3,"d"=4)
+                              ,list("a"=5,"b"=6,"c"=7,"d"=8)
                               )
                             )
+ spec <-col_spec(list(
+   a=col_double()
+   , b=col_double()
+   , c=col_integer()
+   )
+   )
+ pull_item <- function(inlist, target) {
+   val <- inlist[[target]]
+   inlist[[target]] <- NULL
+   return(
+     list(
+       value=val
+       ,list=inlist
+       )
+   )
+ }
+
+ process_spec_one <- function(list, col_name, collector) {
+   pulled <- lapply(list, pull_item, col_name)
+   value <- lapply(pulled, function(x){x[["value"]]})
+   parsed <- parse(value, collector)
+   setNames(list(parsed),col_name)
+ }
+
+ process_spec <- function(list, spec) {
+   proc <- mapply(FUN=process_spec_one, list=list(list)
+          , col_name=as.list(names(spec$cols))
+          , collector=unname(spec$cols)
+          , SIMPLIFY=FALSE
+          )
+
+   dplyr::bind_cols(proc)
+ }
+
+ process_spec(col, spec)
+
+ process_col <- function(data, col, spec) {
+   data %>%
+ }
+
  output <- tibble::data_frame(key=c(1,2)
-                              , output1=c(1,5)
-                              , output2=c(2,6)
-                              , output3=c(3,7)
-                              , output4=c(4,8)
+                              , a=c(1,5)
+                              , b=c(2,6)
+                              , c=c(3,7)
+                              , d=c(4,8)
                               )
 
  # maybe worth creating callbacks for naming the columns...?
