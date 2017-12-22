@@ -1,5 +1,41 @@
 context("test-spread.R")
 
+pull_item <- function(inlist, target, collector) {
+  val <- parse(inlist[[target]], collector)
+  inlist[[target]] <- NULL
+  return(
+    list(
+      value=val
+      ,list=inlist
+    )
+  )
+}
+
+process_spec_one <- function(inlist, col_name, collector) {
+  pulled <- lapply(inlist, pull_item, col_name, collector)
+  value <- lapply(pulled, function(x){x[["value"]]})
+  parsed <- parse(value, collector)
+  setNames(list(parsed),col_name)
+}
+
+process_spec_one_nol <- function(inlist, col_name, collector) {
+  pulled <- pull_item(inlist, col_name, collector)
+  value <- pulled[["value"]]
+  parsed <- parse(value, collector)
+  setNames(list(parsed),col_name)
+}
+
+process_spec <- function(list, spec) {
+  show_cols_spec(spec)
+  proc <- mapply(FUN=process_spec_one, list=list(list)
+                 , col_name=as.list(names(spec$cols))
+                 , collector=as.list(unname(spec$cols))
+                 , SIMPLIFY=FALSE
+  )
+
+  dplyr::bind_cols(proc)
+}
+
 test_that("works with simple list of doubles", {
  tree <- tibble::data_frame(key=c(1,2)
                             ,list_col=list(
@@ -10,52 +46,47 @@ test_that("works with simple list of doubles", {
  spec <-col_spec(list(
    a=col_double()
    , b=col_double()
-   , c=col_integer()
+   , d=col_double()
    )
    )
- pull_item <- function(inlist, target) {
-   val <- inlist[[target]]
-   inlist[[target]] <- NULL
-   return(
-     list(
-       value=val
-       ,list=inlist
-       )
-   )
- }
 
- process_spec_one <- function(list, col_name, collector) {
-   pulled <- lapply(list, pull_item, col_name)
-   value <- lapply(pulled, function(x){x[["value"]]})
-   parsed <- parse(value, collector)
-   setNames(list(parsed),col_name)
- }
-
- process_spec <- function(list, spec) {
-   proc <- mapply(FUN=process_spec_one, list=list(list)
-          , col_name=as.list(names(spec$cols))
-          , collector=unname(spec$cols)
-          , SIMPLIFY=FALSE
-          )
-
-   dplyr::bind_cols(proc)
- }
-
- process_spec(col, spec)
-
- process_col <- function(data, col, spec) {
-   data %>%
- }
+ process_spec(tree$list_col, spec)
 
  output <- tibble::data_frame(key=c(1,2)
                               , a=c(1,5)
                               , b=c(2,6)
-                              , c=c(3,7)
                               , d=c(4,8)
                               )
 
  # maybe worth creating callbacks for naming the columns...?
 })
+
+test_that("works with missing keys", {
+  tree <- tibble::data_frame(key=c(1,2)
+                             ,list_col=list(
+                               list("a"=1,"b"=2,"c"=3)
+                               ,list("a"=5,"c"=7,"d"=8)
+                             )
+  )
+  spec <-col_spec(list(
+    a=col_double()
+    , b=col_double()
+    , d=col_double()
+    , x=col_double()
+  )
+  )
+
+  process_spec(tree$list_col, spec)
+
+  output <- tibble::data_frame(key=c(1,2)
+                               , a=c(1,5)
+                               , b=c(2,NA)
+                               , d=c(NA,8)
+                               , x=as.double(c(NA,NA))
+  )
+
+}
+)
 
 test_that("works with simple list of characters", {
   tree <- tibble::data_frame(key=c(1,2)

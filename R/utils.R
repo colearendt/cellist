@@ -291,3 +291,14 @@ deparse2 <- function(expr, ..., sep = "\n") {
 is_integerish <- function(x) {
   floor(x) == x
 }
+
+# Used in read_delim(), read_fwf() and type_convert()
+show_cols_spec <- function(spec, n = getOption("readr.num_columns", 20)) {
+  if (n > 0) {
+    message("Parsed with column specification:\n",
+            format(spec, n = n, condense = NULL), appendLF = FALSE)
+    if (length(spec$cols) >= n) {
+      message("See spec(...) for full column specifications.")
+    }
+  }
+}
