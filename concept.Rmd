@@ -1,0 +1,120 @@
+---
+title: "Response"
+author: "Cole Arendt"
+date: "12/13/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+My familiarity with list columns comes largely from tibblized JSON data, as well.  However, I really liked the approach taken by the [`tidyjson`](https://github.com/jeremystan/tidyjson) package (which recently got booted from CRAN).  It didn't _actually_ have a list column, but it acted like it did by throwing an ATTR into the tibble as a list column before every operation.  
+
+In general, I think it would be more clear to use something akin to the `gather` and `spread` verbs, but relative to the list column instead of the tibble.  I.e. in @hadley's first and second examples, behavior seems more like `spread`, whereas the third is more of a `gather`.  I also conceived of `readr`-like functionality where columns can either be selected (with types) manually or automatically (i.e. don't select a key and all values/types will be inferred, print the _schema_ as a note, and allow for manipulation).  
+
+It might make sense to pull this functionality into a separate package (I like @hadley's idea of `tidytree`).  Some examples I am hoping illustrate my idea:
+
+Spread-like behavior.  `tidyjson` had a development way to `spread_all` and recurse through keys (it would not spread a list-column like I do below) that was helpful.  Gathering an array was your only option for dealing with arrays, although [a spread option had been proposed](https://github.com/jeremystan/tidyjson/issues/94).
+```{r eval=FALSE}
+tree <- tibble::data_frame(                     
+key = c(1,2)                                    
+, list_col=list(                                
+list("a"=c(1,2)                                 
+, "b"=c(3,4))                                   
+, list("a"=c(5,6)                               
+,"b"=c(7,8))                                    
+)                                               
+)                                               
+print(tree)                                     
+#> # A tibble: 2 x 2
+#>     key   list_col
+#>   <dbl>     <list>
+#> 1     1 <list [2]>
+#> 2     2 <list [2]>
+                                                
+                                                
+# tree %>% spread_tree(list_col,levels=1)       
+# Parsed with column specification:             
+#  cols(                                        
+#    a = col_list(),                            
+#    b = col_list()                             
+#  )                                            
+output_level1 <- tibble::data_frame(            
+key=c(1,2)                                      
+, a=list(c(1,2),c(5,6))                         
+, b=list(c(3,4),c(7,8))                         
+)                                               
+print(output_level1)                            
+#> # A tibble: 2 x 3
+#>     key         a         b
+#>   <dbl>    <list>    <list>
+#> 1     1 <dbl [2]> <dbl [2]>
+#> 2     2 <dbl [2]> <dbl [2]>
+                                                
+# output_level1 %>% spread_tree(levels=1) # hits all list columns?
+#  Parsed with column specification:            
+#    cols(                                      
+#      key = col_integer(),                     
+#      a_1 = col_integer(),                     
+#      a_2 = col_integer(),                     
+#      b_1 = col_integer(),                     
+#      b_2 = col_integer()                      
+#    )                                          
+output_level2 <- tibble::data_frame(            
+key=c(1,2)                                      
+, a_1=c(1,3)                                    
+, a_2=c(2,4)                                    
+, b_1=c(5,7)                                    
+, b_2=c(6,8)                                    
+)                                               
+print(output_level2)                            
+#> # A tibble: 2 x 5
+#>     key   a_1   a_2   b_1   b_2
+#>   <dbl> <dbl> <dbl> <dbl> <dbl>
+#> 1     1     1     2     5     6
+#> 2     2     3     4     7     8
+
+```
+
+Gather-like behavior:
+```{r eval=FALSE}
+tree <- tibble::data_frame(key=c(1,2)       
+, list_col=list(                    
+list("a","b","c")                   
+,list("d","e","f")                  
+)                                   
+)                                   
+#> # A tibble: 2 x 2
+#>     key   list_col
+#>   <dbl>     <list>
+#> 1     1 <list [3]>
+#> 2     2 <list [3]>
+                                    
+                                    
+# tree %>% gather_tree(list_col)            
+# Parsed with column specification: 
+#  cols(                            
+#    output = col_character()       
+#  )                                
+tibble::data_frame(                 
+key=c(rep(1,3),rep(2,3))            
+, output= c("a","b","c","d","e","f")
+)                                   
+#> # A tibble: 6 x 2
+#>     key output
+#>   <dbl>  <chr>
+#> 1     1      a
+#> 2     1      b
+#> 3     1      c
+#> 4     2      d
+#> 5     2      e
+#> 6     2      f
+```
+
+
+I am glossing over several tricky things here - what inferences to make about names when not provided, how to enable the user to control those inferences, etc.
+
+One last tidbit that I thought `tidyjson` did well - it tried to "guarantee" your output state, if you defined what you wanted.  I.e. if you `spread_tree(list_col,output=col_character())`, it would try to coerce a `col_character` even if the underlying list structure changed (i.e. the JSON data changed over time).
+
