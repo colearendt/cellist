@@ -69,3 +69,9 @@ Ideally, this would work even if those object / keys / entries turned out to not
 
 - How should we handle the existing list?  Should we hold to "copy on reference" or should we modify the list using "do not repeat yourself"... pull the items out?  Probaby pull the items out... some items are not reversible
 - maybe worth creating callbacks for naming the columns...?  This at least for unnamed columns... named columns will be preserved?  What about handling nested behavior, though... maybe a callback for that too
+
+
+# To Do
+
+- Create tests to define what the internal functionality should be doing (since I cannot keep it straight otherwise...)
+- Integrate `purrr` more natively
