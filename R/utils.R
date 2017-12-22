@@ -32,8 +32,16 @@ parse_get <- function(collector) {
   }
 }
 
+null_to_na <- function(x){
+  if (is.null(x)) {
+    return(NA)
+  } else {
+    return(x)
+  }
+}
+
 parse_ <- function(x, collector) {
-  parse_get(collector = collector)(x)
+  parse_get(collector = collector)(null_to_na(x))
 }
 
 parse <- function(x, collector) {

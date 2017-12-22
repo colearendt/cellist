@@ -80,19 +80,21 @@ test_that("works with missing keys", {
   spec <-col_spec(list(
     a=col_double()
     , b=col_double()
-    , d=col_double()
-    , x=col_double()
+    , d=col_character()
+    , x=col_integer()
   )
   )
 
-  process_spec(tree$list_col, spec)
   spread_list(tree, "list_col", spec)
 
-  output <- tibble::data_frame(key=c(1,2)
-                               , a=c(1,5)
-                               , b=c(2,NA)
-                               , d=c(NA,8)
-                               , x=as.double(c(NA,NA))
+  output <- tree %>% left_join(
+    tibble::data_frame(key=c(1,2)
+                       , a=c(1,5)
+                       , b=c(2,NA)
+                       , d=as.character(c(NA,8))
+                       , x=as.integer(c(NA,NA))
+                       )
+    , by=c("key")
   )
 
 }
@@ -101,16 +103,27 @@ test_that("works with missing keys", {
 test_that("works with simple list of characters", {
   tree <- tibble::data_frame(key=c(1,2)
                              , list_col=list(
-                               list("a","b","c")
-                               ,list("d","e","f")
+                               list(a="a",b="b",c="c")
+                               ,list(a="d",b="e",c="f")
                                )
                              )
 
-  output <- tibble::data_frame(key=c(1,2)
-                               , output1=c("a","d")
-                               , output2=c("b","e")
-                               , output3=c("c","f")
-                               )
+  spec <- col_spec(
+    list(
+      a = col_character()
+      , b = col_character()
+      , c = col_character()
+    )
+  )
+  spread_list(tree, "list_col",spec)
+  output <- tree %>% left_join(
+    tibble::data_frame(key=c(1,2)
+                       , output1=c("a","d")
+                       , output2=c("b","e")
+                       , output3=c("c","f")
+                       )
+    , by = c("key")
+  )
 })
 
 test_that("works with nested tree", {
