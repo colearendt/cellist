@@ -34,7 +34,7 @@ col_spec(
   list(
     d = col_double()
     , int = col_integer()
-    , obj_uneval = col_list()
+    , obj_raw = col_list()
     , obj_spread = col_list_spread(
       a = col_double
       , name = col_character()
@@ -43,6 +43,7 @@ col_spec(
       b = col_integer()
       , name = col_character()
     )
+    , arr_raw = col_list()
     , arr_spread = col_list_spread(
       1 = col_integer()
       , 2 = col_integer()
@@ -55,7 +56,7 @@ col_spec(
 
 ```
 
-This API seems a little unweildy, but it seems that you would be able to pull out the `collector` functionality into a separate package and make it extensible!  The other strange thing about this is that these collectors make use of the `name` to do look-up by reference.
+This API seems a little unweildy, but it seems that you would be able to pull out the `collector` functionality into a separate package and make it extensible (so the code is not defined for `readr` and `tidylist`)!  These collectors make use of the `name` to do look-up by reference.  This is not unlike `readr`, who also has a `col_names` parameter.  The difference is that in this case, I think asked-for fields should be returned...
 
 The real power comes in something like `guess_spec` that will generate a spec for you... you could also conceive of generating a spec from a JSON Schema / XML schema object!
 
