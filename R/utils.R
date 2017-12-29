@@ -6,6 +6,14 @@ skip <- function(x) {
   return(NULL)
 }
 
+protect_list <- function(x) {
+  if (is.list(x)) {
+    return(x)
+  } else {
+    return(list(x))
+  }
+}
+
 parse_get <- function(collector) {
   if (inherits(collector,'collector_skip')) {
     return(skip)
@@ -27,6 +35,8 @@ parse_get <- function(collector) {
     return(as.character) ## Need TIME
   } else if (inherits(collector, 'collector_factor')) {
     return(as.factor)
+  } else if (inherits(collector, 'collector_list')) {
+    return(protect_list)
   } else {
     return(skip)
   }
@@ -93,6 +103,10 @@ col_skip <- function() {
 
 col_number <- function() {
   collector("number")
+}
+
+col_list <- function(...) {
+  collector("list",...)
 }
 
 

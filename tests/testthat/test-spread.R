@@ -13,10 +13,7 @@ test_that("works with simple list of doubles", {
    , d=col_double()
    )
    )
-
- tree %>% spread_list("list_col",spec)
-
- output <- tree %>% left_join(
+  output <- tree %>% left_join(
    tibble::data_frame(key=c(1,2)
                       , a=c(1,5)
                       , b=c(2,6)
@@ -24,6 +21,12 @@ test_that("works with simple list of doubles", {
                       )
    , by =c("key")
  )
+ expect_identical(
+   tree %>% spread_list("list_col",spec)
+   , output
+ )
+
+
 })
 
 test_that("works with missing keys", {
@@ -40,9 +43,6 @@ test_that("works with missing keys", {
     , x=col_integer()
   )
   )
-
-  spread_list(tree, "list_col", spec)
-
   output <- tree %>% left_join(
     tibble::data_frame(key=c(1,2)
                        , a=c(1,5)
@@ -52,6 +52,12 @@ test_that("works with missing keys", {
                        )
     , by=c("key")
   )
+  expect_identical(
+    spread_list(tree, "list_col", spec)
+    , output
+    )
+
+
 
 }
 )
@@ -71,18 +77,25 @@ test_that("works with simple list of characters", {
       , c = col_character()
     )
   )
-  spread_list(tree, "list_col",spec)
   output <- tree %>% left_join(
     tibble::data_frame(key=c(1,2)
-                       , output1=c("a","d")
-                       , output2=c("b","e")
-                       , output3=c("c","f")
+                       , a=c("a","d")
+                       , b=c("b","e")
+                       , c=c("c","f")
                        )
     , by = c("key")
   )
+  expect_identical(spread_list(tree, "list_col",spec), output)
+
 })
 
-test_that("works with nested tree", {
+expect_lots <- function(object, expected) {
+  expect_equal(names(object),names(expected))
+  mapply(expect_equal, object, expected, SIMPLIFY=FALSE)
+  invisible(object)
+}
+
+test_that("preserves nested list if desired", {
   tree <- tibble::data_frame(
     key = c(1,2)
     , list_col=list(
@@ -92,21 +105,47 @@ test_that("works with nested tree", {
              ,"b"=c(7,8))
     )
   )
-  print(tree)
 
-
-  # tree %>% spread_tree(list_col,levels=1)
-  # Parsed with column specification:
-  #  cols(
-  #    a = col_list(),
-  #    b = col_list()
-  #  )
-  output_level1 <- tibble::data_frame(
-    key=c(1,2)
-    , a=list(c(1,2),c(5,6))
-    , b=list(c(3,4),c(7,8))
+  spec <- col_spec(
+    list(
+      a = col_list()
+      , b = col_list()
+    )
   )
-  print(output_level1)
+
+  output <- tree %>% left_join(tibble::tribble(
+    ~key, ~a, ~b
+    , 1, c(1,2), c(3,4)
+    , 2, c(5,6), c(7,8)
+  ), by="key")
+
+  computed <- spread_list(tree, "list_col", spec)
+
+  expect_lots(computed
+                   , output)
+
+})
+
+
+test_that("spreads a nested tree", {
+  skip("not working")
+  tree <- tibble::data_frame(
+    key = c(1,2)
+    , list_col=list(
+      list("a"=c(1,2)
+           , "b"=c(3,4))
+      , list("a"=c(5,6)
+             ,"b"=c(7,8))
+    )
+  )
+  spec <- col_spec(
+    list(
+      a = col_list(
+        "1" = col_double()
+        , "2" = col_double()
+      )
+    )
+  )
 
   # output_level1 %>% spread_tree(c(a,b),levels=1)
   #  Parsed with column specification:
@@ -117,12 +156,19 @@ test_that("works with nested tree", {
   #      b_1 = col_integer(),
   #      b_2 = col_integer()
   #    )
-  output_level2 <- tibble::data_frame(
-    key=c(1,2)
-    , a_1=c(1,3)
-    , a_2=c(2,4)
-    , b_1=c(5,7)
-    , b_2=c(6,8)
-  )
-  print(output_level2)
+#  output_level2 <- tibble::data_frame(
+#    key=c(1,2)
+#    , a_1=c(1,3)
+#    , a_2=c(2,4)
+#    , b_1=c(5,7)
+#    , b_2=c(6,8)
+#  )
 })
+
+
+#extract_item <- function(.list, .def) {
+#  stopifnot(is.atomic(.def)
+#            , length(.def)==1
+#            , is.list(.list))
+#  lapply(.list, function(x){x[[.def]]})
+#}
