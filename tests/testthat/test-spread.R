@@ -147,6 +147,8 @@ test_that("spreads a nested tree", {
     )
   )
 
+  spread_list(tree, "list_col", spec)
+
   # output_level1 %>% spread_tree(c(a,b),levels=1)
   #  Parsed with column specification:
   #    cols(
