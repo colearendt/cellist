@@ -37,12 +37,13 @@ cascade_names.list <- function(list_or_df, prefix="") {
 #' @rdname cascade_names
 #' @export
 cascade_names.data.frame <- function(list_or_df, prefix="") {
-  return(list_or_df %>% rename_all(.funs = list(
-    function(x) { prep <- paste0(prefix, "_", x);  prep <- stringr::str_replace_all(prep, "_{2,}", "_")
+  helper <- function(z){
+    prep <- paste0(prefix, "_", z);
+    prep <- stringr::str_replace_all(prep, "_{2,}", "_")
     prep <- stringr::str_replace_all(prep, "^_", "")
     return(prep)
   }
-  )))
+  return(list_or_df %>% rename_all(.funs = list( helper )))
 }
 
 #' @rdname cascade_names

@@ -73,3 +73,5 @@ To Do
 
 -   Create tests to define what the internal functionality should be doing (since I cannot keep it straight otherwise...)
 -   Integrate `purrr` more natively
+-   Handle name conflicts
+-   `col_spec` needs to be changed to `col_types` and parsed by `col_spec_standardise`, much like `readr` does
