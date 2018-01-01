@@ -35,6 +35,17 @@ cols_only <- function(...) {
 
 # col_spec ----------------------------------------------------------------
 
+#' TEMP - Col Spec
+#'
+#' This object should really not be exported.  It is due to laziness
+#' in API development, really.
+#'
+#' @param col_types A list of column types
+#' @param default The default col_spec
+#'
+#' @return A `col_spec` object...?
+#'
+#' @export
 col_spec <- function(col_types, default = col_guess()) {
   stopifnot(is.list(col_types))
   stopifnot(is.collector(default))

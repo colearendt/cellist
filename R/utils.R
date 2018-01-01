@@ -1,6 +1,3 @@
-#' @importFrom tibble data_frame
-#' @export
-tibble::data_frame
 
 skip <- function(x) {
   return(NULL)
@@ -81,30 +78,49 @@ collector_find <- function(name) {
   get(paste0("col_", name), envir = asNamespace("readr"))()
 }
 
+
+#' @export
+#' @rdname cols
 col_logical <- function() {
   collector("logical")
 }
 
+#' @export
+#' @rdname cols
 col_integer <- function() {
   collector("integer")
 }
 
+#' @export
+#' @rdname cols
 col_double <- function() {
   collector("double")
 }
 
+#' @export
+#' @rdname cols
 col_character <- function() {
   collector("character")
 }
 
+#' @export
+#' @rdname cols
+#'
+# Necessary?  Or able to do this just by
+# exclusion?  Would be useful to pair
+# with `col_guess`
 col_skip <- function() {
   collector("skip")
 }
 
+#' @export
+#' @rdname cols
 col_number <- function() {
   collector("number")
 }
 
+#' @export
+#' @rdname cols
 col_list <- function(...) {
   collector("list", ...)
 }

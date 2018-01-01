@@ -6,6 +6,18 @@
 \usage{
 spread_list(tbl, inlist, spec)
 }
+\arguments{
+\item{tbl}{A tibble object or data.frame}
+
+\item{inlist}{The list column (currently a length 1 character vector)}
+
+\item{spec}{A \code{col_spec} object}
+}
+\value{
+A tibble with \code{spec} spread into new columns
+}
 \description{
-Spreads a list-column into additional columns
+Spreads a list-column into additional columns by
+combining \code{bind_cols} and \code{map_dfr}.  Also prints the
+\code{col_spec} object
 }

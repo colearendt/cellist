@@ -3,3 +3,4 @@
 ^appveyor\.yml$
 ^CONDUCT\.md$
 ^README\.Rmd$
+^docs$

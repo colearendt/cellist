@@ -2,12 +2,33 @@
 % Please edit documentation in R/cascade_names.R
 \name{cascade_names}
 \alias{cascade_names}
+\alias{cascade_names.list}
+\alias{cascade_names.data.frame}
+\alias{cascade_names.default}
 \title{Cascade Names}
 \usage{
 cascade_names(list_or_df, prefix = "")
+
+\method{cascade_names}{list}(list_or_df, prefix = "")
+
+\method{cascade_names}{data.frame}(list_or_df, prefix = "")
+
+\method{cascade_names}{default}(list_or_df, prefix = "")
 }
 \description{
 Cascade names takes data_frames in a nested lists and pulls
 them up to the top level, appending names that it encounters
 along the way
+}
+\details{
+\itemize{
+\item using "prefix" each time...?
+\item replacing multiple "_" (delimiters) with one
+\item replacing leading delimiters
+}
+
+Really, this function needs to be cleaner!
+
+Recursively dispatches against lists and data.frames, otherwise,
+it functions as the identity (returning its input)
 }
