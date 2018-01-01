@@ -1,13 +1,8 @@
-#' @importFrom tidyr spread
-#' @export
-tidyr::spread
-
-
 pull_item <- function(inlist, target, collector) {
   if (!is.list(inlist))
     inlist <- as.list(inlist)
   val <- parse(inlist[[target]], collector)
-  inlist[[target]] <- NULL
+  #inlist[[target]] <- NULL # rudimentary start on modifiy-on-ref
   return(
     list(
       value=val
@@ -16,14 +11,7 @@ pull_item <- function(inlist, target, collector) {
   )
 }
 
-process_spec_one <- function(inlist, col_name, collector) {
-  pulled <- lapply(list(inlist), pull_item, col_name, collector)
-  value <- lapply(pulled, function(x){x[["value"]]})
-  parsed <- parse(value, collector) # this last (redundant) parse is meant to convert the class...
-  setNames(list(parsed),col_name)
-}
-
- process_spec_one_nol <- function(inlist, col_name, collector) {
+ process_spec_one <- function(inlist, col_name, collector) {
    pulled <- pull_item(inlist, col_name, collector)
    value <- pulled[["value"]]
    parsed <- parse(value, collector) # this last (redundant) parse is meant to convert the class...
@@ -34,7 +22,7 @@ process_spec_one <- function(inlist, col_name, collector) {
    }
    final <- setNames(list(parsed),col_name)
 
-   # need a way to test when I should convert to a tibble!
+   # do not allow nested tibbles... (tibbles will not allow this)
    if (any(as.logical(lapply(final, tibble::is_tibble)))) {
      return(final)
    } else {
@@ -52,7 +40,7 @@ process_spec <- function(inlist, spec) {
   } else {
     nm <- names(spec$cols)
   }
-  proc <- mapply(FUN=process_spec_one_nol, inlist=list(inlist)
+  proc <- mapply(FUN=process_spec_one, inlist=list(inlist)
                  , col_name=as.list(nm)
                  , collector=as.list(unname(spec$cols))
                  , SIMPLIFY=FALSE
@@ -61,7 +49,6 @@ process_spec <- function(inlist, spec) {
   all(as.logical(lapply(proc, function(x){!is.null(names(x))})))
 
   cascade_names(proc)
-  #dplyr::bind_cols(proc)
 }
 
 #' Spread List
@@ -69,5 +56,5 @@ process_spec <- function(inlist, spec) {
 #' Spreads a list-column into additional columns
 spread_list <- function(tbl, inlist, spec) {
   show_cols_spec(spec)
-  tbl %>% bind_cols(map_dfr(.$list_col, process_spec, spec))
+  tbl %>% bind_cols(map_dfr(.[[inlist]], process_spec, spec))
 }

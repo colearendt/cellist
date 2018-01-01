@@ -1,7 +1,7 @@
 Package: tidytree
 Version: 0.0.0.9000
-Title: Tidy Tree-like Data
-Description: What the package does (one paragraph).
+Title: Tidy Tree
+Description: Turn nested lists into tidy datasets
 Authors@R: person("Cole", "Arendt", , "cole@rstudio.com", c("aut", "cre"))
 License: What license it uses
 Encoding: UTF-8
@@ -10,4 +10,7 @@ ByteCompile: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.1
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

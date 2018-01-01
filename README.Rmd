@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 ```
 # tidytree
 
-The goal of tidytree is to ...
+The goal of tidytree is to turn nested list columns into tidy data_frames.
 
 ## Example
 
@@ -24,6 +24,15 @@ This is a basic example which shows you how to solve a common problem:
 ## basic example code
 ```
 
+## Key Functions
+
+- `col_spec` and related items (`col_list`, `col_object`, `col_double`, etc.)
+- `guess_spec`
+- `spread_list`
+- `gather_list`
+- inverse operations to rebuild the list?
+- mappings from `json_schema` objects to `col_spec`?
+- helpers to move from `xml2` and `jsonlite` objects to nested lists
 
 ## API
 
@@ -56,14 +65,11 @@ col_spec(
 
 ```
 
-This API seems a little unweildy, but it seems that you would be able to pull out the `collector` functionality into a separate package and make it extensible (so the code is not defined for `readr` and `tidylist`)!  These collectors make use of the `name` to do look-up by reference.  This is not unlike `readr`, who also has a `col_names` parameter.  The difference is that in this case, I think asked-for fields should be returned...
+This API seems a little unweildy, but it seems that you would be able to pull out the `collector` functionality into a separate package and make it extensible (so the code is not defined for `readr` and `tidylist`)!  These collectors make use of the `name` to do look-up by reference.  This is not unlike `readr`, who also has a `col_names` parameter.  The difference is that in this case, I think asked-for fields should be returned, even if not present.
 
 The real power comes in something like `guess_spec` that will generate a spec for you... you could also conceive of generating a spec from a JSON Schema / XML schema object!
 
 This also needs to be do-able by integer reference, i.e. `list(1,"a","b")` would grab the 1st object of a list, the first "a" key, and then the first "b" key.
-
-Ideally, this would work even if those object / keys / entries turned out to not be present!!
-
 
 
 # Open Questions

@@ -1,0 +1,106 @@
+---
+title: "Introduction to Spread"
+author: "Cole Arendt"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{intro-spread}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+One type of operation typically used in "tidying" nested lists is the `spread` operation.  In the `tidytree` package, this is called `spread_list`.  `spread_list` uses a `col_spec` object to spread nested list "keys" out into new columns.  Some of the main features:
+
+- named keys become output column names
+- unnamed keys (part of an array-like object) have names imputed (`1`, `2`, etc.).  It would be great for this behavior to be a call-back function the end-user can edit
+- nested keys inherit parent keys.  Again, this should have a callback to edit behavior
+- It is possible to preserve list columns for other types of operations (use the `col_list` spec)
+- If the user does not define a `col_spec`, it should be _guessed_ for them and returned (much like `readr` does)
+- Should it be possible to specify "levels deep" for guessing?  I.e. preserve objects as-is for any depth greater than N
+- Missing keys (for a provided spec) should be treated as `NA` (i.e. the `spread_list` should not break when the objects change)
+- Non-standard evaluation should be taken into account for easier interactive usage
+
+One item that has not been taken into account yet is whether the API should:
+
+- Copy on reference (leave the original list intact)
+- Modify on reference (pull keys / objects out of the original list)
+
+We lean towards the latter, since `gather` and other operations are inherently "modifiers" (the unique identifiers for rows will change).
+
+## Sample Usage
+
+The simplest usage is a list-column without nested objects.  Here, we spread various selection of keys and change column types by altering the spec, as well.
+
+```{r simple_spread}
+raw_obj <- tibble::tribble(
+  ~key, ~cellist
+  ,1, list("num"=1, "num2"=2, "char"="test")
+  ,2, list("num"=9, "num2"=12)
+  ,3, list("num"=47, "char"="testing")
+  ,4, list("num"="test", "num2"=12, "char"=1234)
+)
+
+spread_list(raw_obj, "cellist", col_spec(list(num=col_double(), num2=col_integer(), char=col_character())))
+
+spread_list(raw_obj, "cellist", col_spec(list(num=col_character(), num2=col_double())))
+```
+
+We can also see the imputed column names (here not imputed so much as defined).  
+
+TODO: if the `i`th object is missing, it should get `NA`.  Presently, we get an error.
+
+```{r number_spread}
+raw_obj <- tibble::tribble(
+  ~key, ~cellist
+  , 1, list("obj", "obj2", "obj3")
+  , 2, list("another", "one more", "yep")
+)
+
+spread_list(raw_obj, "cellist", col_spec(list("1"=col_character(), "2"=col_character(), "3"=col_character())))
+
+# choose just a subset of columns
+spread_list(raw_obj, "cellist", col_spec(list("1"=col_character())))
+```
+
+## Preserve Nested List
+
+Things get more interesting for nested lists.  Here, we opt to preserve it by using the `col_list` spec.  Note that the sub-lists are preserved as-is
+
+
+```{r preserve_nested}
+raw_obj <- tibble::tribble(
+  ~key, ~cellist
+  , 1, list("nested"=c(1,2), "other"="one")
+  , 2, list("nested"=c(3,4), "other"="test")
+  , 3, list("nested"=c("a","b"), "other"="again")
+)
+
+spread_list(raw_obj, "cellist", col_spec(list(nested=col_list(), other=col_character())))
+
+```
+
+This approach can be very useful if the nested object represents a class, needs to be handled by `gather` or some other verb, or if this is a good place to pause the tidying process.
+
+## Spread Nested Lists
+
+Other times, it will be desirable to extract information from nested lists.  Of course, we could use another verb, but for now, we will `spread_list` out of a nested object.  For simplicity, we will use the same object from the previous section.
+
+```{r spread_nested}
+spread_list(raw_obj, "cellist"
+            , col_spec(list(
+              nested = col_list(
+                "1" = col_character()
+                , "2" = col_double()
+              )
+              , other = col_character()
+            )))
+```
+
+
