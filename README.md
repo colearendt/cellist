@@ -1,9 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-tidytree
-========
+cellist
+=======
 
-The goal of tidytree is to ...
+The goal of cellist is to turn nested list columns into tidy data\_frames.
 
 Example
 -------

@@ -1,4 +1,4 @@
 library(testthat)
-library(tidytree)
+library(cellist)
 
-test_check("tidytree")
+test_check("cellist")

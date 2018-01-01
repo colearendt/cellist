@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-One type of operation typically used in "tidying" nested lists is the `spread` operation.  In the `tidytree` package, this is called `spread_list`.  `spread_list` uses a `col_spec` object to spread nested list "keys" out into new columns.  Some of the main features:
+One type of operation typically used in "tidying" nested lists is the `spread` operation.  In the `cellist` package, this is called `spread_list`.  `spread_list` uses a `col_spec` object to spread nested list "keys" out into new columns.  Some of the main features:
 
 - named keys become output column names
 - unnamed keys (part of an array-like object) have names imputed (`1`, `2`, etc.).  It would be great for this behavior to be a call-back function the end-user can edit
