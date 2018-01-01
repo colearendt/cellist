@@ -144,27 +144,24 @@ test_that("spreads a nested tree", {
         "1" = col_double()
         , "2" = col_double()
       )
+      , b = col_list(
+        "1" = col_double()
+        , "2" = col_double()
+      )
     )
   )
 
-  spread_list(tree, "list_col", spec)
+  computed <- spread_list(tree, "list_col", spec)
 
-  # output_level1 %>% spread_tree(c(a,b),levels=1)
-  #  Parsed with column specification:
-  #    cols(
-  #      key = col_integer(),
-  #      a_1 = col_integer(),
-  #      a_2 = col_integer(),
-  #      b_1 = col_integer(),
-  #      b_2 = col_integer()
-  #    )
-#  output_level2 <- tibble::data_frame(
-#    key=c(1,2)
-#    , a_1=c(1,3)
-#    , a_2=c(2,4)
-#    , b_1=c(5,7)
-#    , b_2=c(6,8)
-#  )
+  output <- tree %>% left_join(tibble::data_frame(
+    key=c(1,2)
+    , a_1=c(1,5)
+    , a_2=c(2,6)
+    , b_1=c(3,7)
+    , b_2=c(4,8)
+  ), by=c("key"))
+
+  expect_lots(computed, output)
 })
 
 

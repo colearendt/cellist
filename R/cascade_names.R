@@ -14,9 +14,22 @@ cascade_names.list <- function(list_or_df, prefix="") {
     nm <- names(list_or_df)
   }
   obj <- lapply(list_or_df, cascade_names, prefix=paste0(prefix, nm))
-  return(bind_cols(obj))
+#  if (any(!as.character(lapply(list_or_df,class)) %in% c("data.frame","list"))) {
+#    return(obj)
+#  } else {
+    return(bind_cols(obj))
+#  }
+
 }
 
 cascade_names.data.frame <- function(list_or_df, prefix="") {
-  return(list_or_df %>% rename_all(.funs=list(function(x){paste0(prefix,x)})))
+  return(list_or_df %>% rename_all(.funs=list(function(x){prep <- paste0(prefix,"_",x);
+  prep <- stringr::str_replace_all(prep, "_{2,}", "_")
+  prep <- stringr::str_replace_all(prep, "^_", "")
+  return(prep)
+  })))
+}
+
+cascade_names.default <- function(list_or_df, prefix="") {
+  return(list_or_df)
 }

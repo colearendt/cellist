@@ -32,7 +32,14 @@ process_spec_one <- function(inlist, col_name, collector) {
      # dispatch on sub-items
      parsed <- process_spec(parsed[[1]], col_spec(lapply(collector,identity)))
    }
-   setNames(list(parsed),col_name)
+   final <- setNames(list(parsed),col_name)
+
+   # need a way to test when I should convert to a tibble!
+   if (any(as.logical(lapply(final, tibble::is_tibble)))) {
+     return(final)
+   } else {
+     return(as_tibble(final))
+   }
  }
 
 process_spec <- function(inlist, spec) {
@@ -51,7 +58,10 @@ process_spec <- function(inlist, spec) {
                  , SIMPLIFY=FALSE
   )
 
-  dplyr::bind_cols(proc)
+  all(as.logical(lapply(proc, function(x){!is.null(names(x))})))
+
+  cascade_names(proc)
+  #dplyr::bind_cols(proc)
 }
 
 #' Spread List
