@@ -15,34 +15,34 @@ protect_list <- function(x) {
 }
 
 parse_get <- function(collector) {
-  if (inherits(collector,'collector_skip')) {
+  if (inherits(collector, "collector_skip")) {
     return(skip)
-  } else if( inherits(collector,'collector_logical')) {
+  } else if (inherits(collector, "collector_logical")) {
     return(as.logical)
-  } else if (inherits(collector,'collector_integer')) {
+  } else if (inherits(collector, "collector_integer")) {
     return(as.integer)
-  } else if (inherits(collector, 'collector_double')) {
+  } else if (inherits(collector, "collector_double")) {
     return(as.double)
-  } else if (inherits(collector, 'collector_number')) {
+  } else if (inherits(collector, "collector_number")) {
     return(as.numeric)
-  } else if (inherits(collector,'collector_character')) {
+  } else if (inherits(collector, "collector_character")) {
     return(as.character)
-  } else if (inherits(collector,'collector_date')) {
+  } else if (inherits(collector, "collector_date")) {
     return(as.Date)
-  } else if (inherits(collector, 'collector_datetime')) {
+  } else if (inherits(collector, "collector_datetime")) {
     return(as.POSIXct)
-  } else if (inherits(collector, 'collector_time')) {
+  } else if (inherits(collector, "collector_time")) {
     return(as.character) ## Need TIME
-  } else if (inherits(collector, 'collector_factor')) {
+  } else if (inherits(collector, "collector_factor")) {
     return(as.factor)
-  } else if (inherits(collector, 'collector_list')) {
+  } else if (inherits(collector, "collector_list")) {
     return(protect_list)
   } else {
     return(skip)
   }
 }
 
-null_to_na <- function(x){
+null_to_na <- function(x) {
   if (is.null(x)) {
     return(NA)
   } else {
@@ -59,11 +59,11 @@ parse <- function(x, collector) {
     collector <- collector_find(collector)
   }
 
-  parse_(x,collector)
+  parse_(x, collector)
 }
 
 collector <- function(type, ...) {
-  structure(list(...), class=c(paste0('collector_',type), 'collector'))
+  structure(list(...), class = c(paste0("collector_", type), "collector"))
 }
 
 is.collector <- function(x) inherits(x, "collector")
@@ -106,7 +106,7 @@ col_number <- function() {
 }
 
 col_list <- function(...) {
-  collector("list",...)
+  collector("list", ...)
 }
 
 
@@ -317,8 +317,10 @@ is_integerish <- function(x) {
 # Used in read_delim(), read_fwf() and type_convert()
 show_cols_spec <- function(spec, n = getOption("readr.num_columns", 20)) {
   if (n > 0) {
-    message("Parsed with column specification:\n",
-            format(spec, n = n, condense = NULL), appendLF = FALSE)
+    message(
+      "Parsed with column specification:\n",
+      format(spec, n = n, condense = NULL), appendLF = FALSE
+    )
     if (length(spec$cols) >= n) {
       message("See spec(...) for full column specifications.")
     }
